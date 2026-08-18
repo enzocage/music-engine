@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Multi-Channel Music Engine &amp; Mathematical Visualizer</title>
+  <link rel="stylesheet" href="./src/ui/styles/main.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- Top Header & Transport Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1>UNIVERSAL MUSIC ENGINE</h1>
+        <span>22-MODULE MATHEMATICAL SYNTHESIS &amp; 3D GPU VISUALIZER</span>
+      </div>
+    </div>
+
+    <!-- Transport & Playback Controls -->
+    <div class="transport-group">
+      <button id="btn-play" class="btn btn-primary">▶ PLAY</button>
+      <button id="btn-stop" class="btn">⏹ STOP</button>
+      
+      <div class="bpm-box">
+        <span style="color: var(--text-muted); font-size: 11px;">BPM</span>
+        <input type="number" id="input-bpm" value="124" min="40" max="280">
+      </div>
+
+      <select id="select-preset" class="select-box">
+        <option value="cybernetic_symphony">⚡ Cybernetic Symphony (22-Module Mix)</option>
+        <option value="mathematical_genesis">🌀 Mathematical Genesis (Quantum &amp; IDM)</option>
+        <option value="quantum_resonance">🌌 Quantum Resonance (Ambient Fractal)</option>
+        <option value="xenakis_archipelago">🎲 Xenakis Stochastic Archipelago</option>
+      </select>
+
+      <select id="select-scale" class="select-box">
+        <option value="minor">Natural Minor</option>
+        <option value="dorian">Dorian</option>
+        <option value="pentatonic_minor">Minor Pentatonic</option>
+        <option value="hirajoshi">Hirajoshi</option>
+        <option value="major">Major</option>
+      </select>
+    </div>
+
+    <!-- Master & View Controls -->
+    <div class="master-controls">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">MASTER</span>
+        <input type="range" id="slider-master-vol" class="vol-slider" min="0" max="1" step="0.01" value="0.85">
+      </div>
+      
+      <button id="btn-toggle-drawer" class="btn">🎛️ CONTROLS &amp; SEQUENCER</button>
+    </div>
+  </header>
+
+  <!-- Main Viewport -->
+  <main>
+    <!-- 3D WebGL Canvas Viewport -->
+    <div id="visualizer-container">
+      <!-- 3D View Mode Switcher -->
+      <div class="view-mode-buttons">
+        <button id="btn-mode-interplay" class="mode-btn active">🌌 Master Interplay (16-Ch Hyper-Sphere)</button>
+        <button id="btn-mode-matrix" class="mode-btn">🎛️ 16-Channel 3D Matrix</button>
+        <button id="btn-mode-deepdive" class="mode-btn">🔬 Synth Math Deep-Dive</button>
+      </div>
+
+      <!-- HUD Overlay -->
+      <div class="hud-overlay">
+        <div class="hud-card" id="hud-info">
+          <h3 id="hud-title">🌌 Master Interplay Center</h3>
+          <div class="math-formula" id="hud-formula">
+            Deforming 16-Dimensional Phase Sphere: $R_{xy}(\tau) = \int x(t)y(t+\tau)dt$
+          </div>
+        </div>
+
+        <div class="hud-card" style="text-align: right;">
+          <h3 style="justify-content: flex-end;">AUDIO ENGINE TELEMETRY</h3>
+          <div class="math-formula" id="hud-stats">
+            Active: 22 Module Arsenal | 44.1 kHz | 0 Dropouts
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collapsible Drawer (Sequencer, Synth Inspector, Math Reference) -->
+    <div class="drawer-panel" id="drawer-panel">
+      <div class="drawer-header">
+        <div class="drawer-tabs">
+          <button class="drawer-tab active" data-tab="sequencer">🎹 16-Track Sequencer &amp; Euclidean</button>
+          <button class="drawer-tab" data-tab="inspector">⚙️ Channel Synth Inspector</button>
+          <button class="drawer-tab" data-tab="math">📐 Mathematical Foundations</button>
+          <button class="drawer-tab" data-tab="keyboard">🎹 Live Keyboard</button>
+        </div>
+        <button id="btn-close-drawer" class="btn" style="padding: 4px 8px; font-size: 11px;">✕ CLOSE</button>
+      </div>
+
+      <div class="drawer-content">
+        <!-- Tab 1: Sequencer -->
+        <div class="tab-pane active" id="tab-sequencer">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span id="seq-active-track-name" style="font-weight: 700; color: var(--accent-cyan);">Track 1 (Virtual Analog)</span>
+              <button id="btn-seq-euclidean" class="btn" style="font-size: 11px; padding: 4px 10px;">⚡ Generate Euclidean (5 in 16)</button>
+              <button id="btn-seq-fibonacci" class="btn" style="font-size: 11px; padding: 4px 10px;">🌀 Formula: Fibonacci Arp</button>
+              <button id="btn-seq-clear" class="btn btn-danger" style="font-size: 11px; padding: 4px 10px;">Clear Track</button>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">16 Steps (16th notes)</span>
+          </div>
+
+          <div class="sequencer-grid" id="sequencer-grid">
+            <!-- 16 Step cells dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Synth Inspector & Stepper -->
+        <div class="tab-pane" id="tab-inspector" style="display: none;">
+          <!-- Module Stepper & Navigation Toolbar -->
+          <div class="module-stepper-bar">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <button id="btn-module-prev" class="btn btn-stepper" title="Vorheriges Modul (Taste [)">◀ Vorheriges Modul</button>
+              <div id="module-counter-badge" class="module-badge">Modul 1 / 22</div>
+              <button id="btn-module-next" class="btn btn-stepper" title="Nächstes Modul (Taste ])">Nächstes Modul ▶</button>
+              <button id="btn-module-randomize" class="btn btn-random" title="Parameter Zufall">🎲 Randomize</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span id="inspector-category-badge" class="category-badge">Classic</span>
+              <select id="inspector-synth-selector" class="select-box" style="min-width: 240px;"></select>
+            </div>
+          </div>
+
+          <div id="inspector-desc-bar" class="inspector-desc">
+            PolyBLEP bandbegrenzte Oszillatoren mit spannungsgesteuertem Zero-Delay Filter.
+          </div>
+
+          <!-- Parameter Cards Grid -->
+          <div class="params-grid" id="params-grid">
+            <!-- Dynamic 10-20 parameter cards populated by JS -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Math Reference -->
+        <div class="tab-pane" id="tab-math" style="display: none;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; font-size: 12px; line-height: 1.6; max-height: 260px; overflow-y: auto; padding-right: 8px;">
+            <div class="param-card">
+              <h4 style="color: #00f0ff;">1. Virtual Analog &amp; PolyBLEP</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$x(t) = \text{saw}(t) - \text{PolyBLEP}(t)$<br>Bandbegrenzte Sprungfunktionen zur Aliasing-Beseitigung.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #7b2cbf;">2. 6-Op FM &amp; Bessel</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$y(t) = \sin(\omega_c t + I \sin(\omega_m t)) = \sum J_n(I) \sin((\omega_c + n\omega_m)t)$<br>Jacobi-Anger Spektralzerlegung.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #4cc9f0;">3. Karplus-Strong Waveguide</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$y[n] = x[n] + \rho \frac{y[n-L] + y[n-L-1]}{2}$<br>Rekursive 1D Saiten-Dämpfungsgleichung.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #06d6a0;">4. Cellular Automata (Wolfram)</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$s_i^{t+1} = R(s_{i-1}^t, s_i^t, s_{i+1}^t)$<br>Turing-vollständige 1D/2D Automaten-Obertöne.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #118ab2;">5. Scanned Synthesis &amp; Mesh</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$M \ddot{x} + D \dot{x} + K x = F_{pluck}, \ y(t) = x(\text{orbit}(t))$<br>Audio-Abtastung schwingender Feder-Massen-Netze.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #d90429;">6. Fractal Julia &amp; Mandelbrot</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$z_{n+1} = z_n^2 + c, \ \text{pot}(z) = \lim \frac{\ln|z_n|}{2^n}$<br>Fluchtzeit-Dynamik im komplexen Phasenraum.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #8338ec;">7. Neural Wave-Terrain Morph</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$z(t) = f(x(t), y(t)), \ \begin{cases} x = r_x \sin(\omega_x t) \\ y = r_y \cos(\omega_y t) \end{cases}$<br>Nichtlineare 3D-Potenzialfeld-Abtastung.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #ff006e;">8. Stochastic Gendyn (Xenakis)</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$x_k^{t+1} = x_k^t + \Delta x \cdot \text{Cauchy}(u) \pmod{\text{Barriers}}$<br>Dynamisch-stochastische Breakpoint-Random-Walks.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #ff5400;">9. Bowed String Stick-Slip</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$F_{\mu} = \mu(v_{rel}) \cdot F_{bow}, \ \mu(v) = \mu_d + (\mu_s - \mu_d)e^{-c|v|}$<br>Helmholtz Bogenakustik mit Hysterese.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #3a86ff;">10. Vortex Fluidics &amp; Aeolian</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$f_{vortex} = St \cdot \frac{v}{d}, \ p(t) = \Delta P \cdot \sin(2\pi f_{vortex} t)$<br>Kármánsche Wirbelstraßen &amp; Pfeifen-Turbulenz.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #00b4d8;">11. Spectral Freeze &amp; Shimmer</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$X_{frozen}(\omega) = (1-\alpha)X(\omega) + \alpha X_{hold}(\omega) * H_{shimmer}$<br>Spektral-Hold, Phasen-Diffusor &amp; Pitch-Shimmer.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #ffbe0b;">12. Pulsar Synthesis (Curtis Roads)</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$p(t) = \sum w(t - nT_0) \cdot \sin(2\pi F_{formant} t)$<br>Mikro-akustische Pulsaret-Trains mit Fensterung.</p>
+            </div>
+            <div class="param-card">
+              <h4 style="color: #9d4edd;">13. Polytopic 4D Tesseract</h4>
+              <p style="color: var(--text-secondary); margin-top: 4px;">$V_{rot} = R_{4D}(\theta_{xw}, \theta_{yz}, \theta_{zw}) \cdot V_0, \ y(t) = \sum w_i(t)\text{osc}_i(t)$<br>16-Eckpunkt 4D Rotationsmatrix-Interpolation.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Live Virtual Keyboard -->
+        <div class="tab-pane" id="tab-keyboard" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: #cbd5e1;">⌨️ Tasten: <code style="color: var(--accent-cyan); background: rgba(0,240,255,0.1); padding: 2px 6px; border-radius: 4px;">A W S E D F T G Z H U J K</code> | Modul-Step: <code style="color: var(--accent-amber); background: rgba(255,183,3,0.1); padding: 2px 6px; border-radius: 4px;">[ ]</code></span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button id="btn-octave-down" class="btn" style="padding: 2px 8px; font-size: 11px;">◀ [Y] Okt -</button>
+                <span id="current-octave-display" style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-amber); font-weight: 700;">C3 (48)</span>
+                <button id="btn-octave-up" class="btn" style="padding: 2px 8px; font-size: 11px;">[X] Okt + ▶</button>
+              </div>
+            </div>
+            <span style="color: var(--accent-cyan); font-weight: 700; font-family: var(--font-mono);" id="kbd-active-target">Target: Ch 1</span>
+          </div>
+          <div id="virtual-piano-keys" style="display: flex; height: 110px; gap: 4px; overflow-x: auto; padding-bottom: 8px;">
+            <!-- Piano Keys dynamically generated with computer key shortcuts -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom 16-Channel Mixer Bar -->
+    <div class="mixer-bar">
+      <div class="mixer-header">
+        <h2>16 PARALLEL SYNTHESIZER CHANNELS</h2>
+        <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">KLICKE AUF EINEN KANAL ZUM EDITIEREN &bull; WECHSLE DAS SYNTH-MODUL IM INSPECTOR</span>
+      </div>
+
+      <div class="channel-strip-container" id="channel-strip-container">
+        <!-- 16 Channel Strips dynamically populated -->
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
